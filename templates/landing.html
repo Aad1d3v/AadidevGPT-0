@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#EFE8D7">
+<meta name="description" content="AadidevGPT-0 — your personal AI assistant powered by model 04Aadi.">
+<meta name="google-site-verification" content="gI7HajvSTpfbnlnBBCzHZMkQNW_iOVm6kpFzJX8z2SA" />
+<title>Welcome to AadidevGPT-0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+    --accent:#6B773E;
+    --accent-2:#56622F;
+    --bg:#EFE8D7;
+    --card:#F8F3E6;
+    --border:#A3A96B;
+    --text:#4A5030;
+    --muted:#7D8563;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+    font-family:"Inter",sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.7;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--accent);color:#F8F3E6;}
+
+/* Glow */
+.hero::before{
+    content:"";
+    position:absolute;
+    width:640px;height:640px;
+    background:radial-gradient(circle,#B7BD7F55 0%,transparent 70%);
+    top:-260px;right:-220px;
+    pointer-events:none;
+    animation:float 8s ease-in-out infinite;
+}
+@keyframes float{
+    0%,100%{transform:translate(0,0);}
+    50%{transform:translate(-24px,18px);}
+}
+
+/* Top bar */
+.topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 28px;max-width:1080px;margin:0 auto;
+}
+.brand{display:flex;align-items:center;gap:12px;font-family:"Fraunces",serif;font-weight:700;font-size:18px;}
+.brand .dot{
+    width:13px;height:13px;border-radius:50%;
+    background:#3b82f6;
+    box-shadow:0 0 12px #3b82f6,0 0 24px #3b82f6;
+    animation:blink 2.4s infinite;
+}
+@keyframes blink{0%,80%,100%{opacity:1;}40%{opacity:.6;}}
+.brand small{color:var(--muted);font-weight:500;font-size:13px;}
+.enter-btn{
+    background:var(--accent);border:none;color:white;
+    padding:10px 22px;border-radius:999px;font-weight:700;font-size:14px;
+    cursor:pointer;text-decoration:none;transition:.2s;
+    display:inline-flex;align-items:center;gap:8px;
+}
+.enter-btn:hover{background:var(--accent-2);transform:translateY(-2px);box-shadow:0 8px 24px var(--accent)55;}
+
+/* Hero */
+.hero{
+    position:relative;
+    text-align:center;
+    padding:88px 24px 60px;
+    max-width:820px;margin:0 auto;
+}
+.hero .badge{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--card);border:1px solid var(--border);
+    color:var(--muted);font-size:13px;font-weight:600;
+    padding:8px 16px;border-radius:999px;margin-bottom:26px;
+}
+.hero .badge .live{width:8px;height:8px;border-radius:50%;background:#93A34F;box-shadow:0 0 8px #93A34F;animation:blink 1.6s infinite;}
+.hero h1{
+    font-family:"Fraunces",serif;
+    font-size:clamp(34px,6vw,58px);
+    font-weight:600;letter-spacing:-.02em;line-height:1.15;
+    margin-bottom:18px;
+}
+.hero h1 .grad{
+    background:linear-gradient(90deg,var(--accent),#9CA55E);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero p{
+    color:var(--muted);font-size:clamp(16px,2.4vw,19px);
+    max-width:620px;margin:0 auto 34px;
+}
+.hero-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.cta-primary{
+    background:var(--accent);color:#F8F3E6;text-decoration:none;
+    padding:15px 34px;border-radius:14px;font-weight:700;font-size:16px;
+    transition:.2s;box-shadow:0 2px 10px #6B773E2e;
+}
+.cta-primary:hover{background:var(--accent-2);transform:translateY(-2px);box-shadow:0 10px 30px #6B773E45;}
+.cta-secondary{
+    background:var(--card);border:1px solid var(--border);color:var(--text);
+    text-decoration:none;padding:15px 30px;border-radius:14px;font-weight:600;font-size:15px;
+    transition:.2s;
+}
+.cta-secondary:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 18px #6B773E1f;}
+.hero .hint{margin-top:20px;font-size:13px;color:var(--muted);}
+
+/* Sections */
+section{padding:64px 24px;max-width:900px;margin:0 auto;}
+.section-tag{
+    color:var(--accent);font-size:13px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px;
+}
+h2{font-family:"Fraunces",serif;font-size:clamp(26px,4vw,36px);font-weight:600;letter-spacing:-.01em;margin-bottom:14px;}
+.lead{color:var(--muted);font-size:16px;max-width:640px;margin-bottom:28px;}
+.placeholder{
+    background:var(--card);border:1px dashed var(--border);
+    border-radius:14px;padding:18px 20px;color:var(--muted);font-size:14px;
+    margin:14px 0;
+}
+.placeholder b{color:var(--text);}
+.hl{color:var(--text);font-weight:600;}
+
+/* Feature grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:8px;}
+.card{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:16px;padding:22px;
+    transition:.2s;cursor:default;
+    box-shadow:0 1px 3px #6B773E14;
+}
+.card:hover{transform:translateY(-3px);border-color:var(--accent)aa;box-shadow:0 12px 28px #6B773E26;}
+.card .ico{font-size:26px;margin-bottom:12px;display:block;}
+.card h3{font-family:"Fraunces",serif;font-size:16.5px;font-weight:600;margin-bottom:8px;}
+.card p{color:var(--muted);font-size:13.5px;line-height:1.6;}
+
+/* Steps */
+.steps{display:flex;flex-direction:column;gap:14px;margin-top:8px;}
+.step{
+    display:flex;gap:16px;align-items:flex-start;
+    background:var(--card);border:1px solid var(--border);
+    border-radius:16px;padding:20px 22px;
+}
+.step .num{
+    flex:none;width:34px;height:34px;border-radius:10px;
+    background:var(--accent)1a;color:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+    font-family:"Fraunces",serif;font-weight:600;font-size:15px;
+}
+.step h3{font-family:"Fraunces",serif;font-size:16.5px;font-weight:600;margin-bottom:4px;}
+.step p{color:var(--muted);font-size:14px;}
+
+/* Bottom pair: two blocks side by side */
+.bottom-pair{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:28px;
+    align-items:start;
+    max-width:1080px;
+    margin:0 auto;
+    padding:0 24px;
+}
+.bottom-pair section{
+    max-width:none;
+    width:100%;
+    padding:48px 0;
+}
+
+/* FAQ accordion */
+.faq-item{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:14px;margin-bottom:12px;overflow:hidden;
+}
+.faq-q{
+    width:100%;text-align:left;background:none;border:none;color:var(--text);
+    font-family:"Fraunces",serif;font-size:15.5px;font-weight:600;
+    padding:18px 22px;cursor:pointer;
+    display:flex;justify-content:space-between;align-items:center;gap:14px;
+}
+.faq-q .arrow{color:var(--muted);transition:.2s;font-size:13px;}
+.faq-item.open .faq-q .arrow{transform:rotate(180deg);color:var(--accent);}
+.faq-a{display:none;padding:0 22px 18px;color:var(--muted);font-size:14px;}
+.faq-item.open .faq-a{display:block;animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
+
+/* Footer */
+footer{
+    border-top:1px solid var(--border);
+    padding:34px 24px;text-align:center;color:var(--muted);font-size:13px;
+}
+footer .foot-brand{display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:10px;color:var(--text);font-weight:700;}
+footer .dot{width:11px;height:11px;border-radius:50%;background:#3b82f6;box-shadow:0 0 10px #3b82f6;}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+.chip{background:#EFE8D7;border:1px solid #A3A96B;border-radius:999px;padding:7px 13px;font-size:13px;color:#555B3A;font-weight:500;}
+
+/* Reveal on scroll */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease;}
+.reveal.show{opacity:1;transform:none;}
+
+@media(max-width:800px){
+    .bottom-pair{grid-template-columns:1fr;padding:0 16px;gap:8px;}
+    .bottom-pair section{padding:40px 4px;}
+}
+
+@media(max-width:640px){
+    .hero{padding:60px 20px 40px;}
+    section{padding:48px 20px;}
+    .step{flex-direction:column;gap:10px;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="brand">
+        <span class="dot"></span>
+        AadidevGPT-0 <small>/ model 04Aadi</small>
+    </div>
+    <a class="enter-btn" href="/welcome/enter">Get started →</a>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="badge"><span class="live"></span> Your personal AI assistant is ready</div>
+    <h1>Welcome to <span class="grad">AadidevGPT-0</span></h1>
+    <p>A hand-built AI assistant with live streaming, memory, project mode, and personas — powered by model 04Aadi.</p>
+    <div class="hero-cta">
+        <a class="cta-primary" href="/welcome/enter">Start chatting — it's free</a>
+        <a class="cta-secondary" href="/welcome/enter">Sign in</a>
+    </div>
+    <p class="hint">First chat is free · no credit card · works on every device</p>
+</div>
+
+<!-- WHAT IS IT -->
+<section class="reveal">
+    <div class="section-tag">What is it?</div>
+    <h2>What is AadidevGPT-0?</h2>
+    <p class="lead">AadidevGPT-0 is a complete AI assistant built from scratch: a Flask backend that streams replies in real time, a chat app with persistent memory and project mode, and a real account system with email and Google sign-in. No templates, no wrappers — every part was written by hand, and this page tells you exactly how it works.</p>
+
+    <div class="card" style="margin-top:8px;">
+        <span class="ico">✨</span>
+        <h3>My story</h3>
+        <p>I created AadidevGPT because I wanted to build my own AI assistant and learn how real AI products are made. What started as an idea became a full project that I could continuously improve and develop myself.</p>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="reveal">
+    <div class="section-tag">Under the hood</div>
+    <h2>How it actually works</h2>
+    <p class="lead">The real mechanics behind the features — no magic, just code.</p>
+
+    <div class="grid">
+        <div class="card"><span class="ico">⚡</span><h3>Streaming</h3><p>Every reply streams token-by-token over Server-Sent Events. The Flask backend pipes the model's output straight to your browser, where it renders as live markdown — no waiting for a full answer.</p></div>
+        <div class="card"><span class="ico">🧠</span><h3>Memory</h3><p>Tap "Remember this" on any reply and that fact is saved to your account. On every future message it's injected into the model's context — "Forget all" wipes it instantly.</p></div>
+        <div class="card"><span class="ico">📁</span><h3>Project context</h3><p>Name a project once and its description rides along in the context of every request, so AadidevGPT-0 keeps it in mind across all your chats. A pill in the header shows what it's tracking.</p></div>
+        <div class="card"><span class="ico">🤖</span><h3>Model 04Aadi</h3><p>04Aadi is the application layer — the prompt system, personas, modes, and memory built by Aadidev. The model underneath is a hosted open-source LLM (gpt-oss-20b) called through the Groq API.</p></div>
+    </div>
+</section>
+
+<!-- HOW IT WAS MADE -->
+<section class="reveal">
+    <div class="section-tag">How it was made</div>
+    <h2>How I made it</h2>
+    <p class="lead">The technology behind AadidevGPT-0, in plain English.</p>
+
+    <div class="grid">
+        <div class="card"><span class="ico">⚙️</span><h3>Technology</h3><p>Python + Flask on the backend, vanilla HTML/CSS/JavaScript in the browser, and SQLite locally or PostgreSQL in production — no frontend framework, everything hand-written.</p></div>
+        <div class="card"><span class="ico">🤖</span><h3>The model</h3><p>A hosted open-source language model (gpt-oss-20b), called through the Groq API. On top of it sits 04Aadi — the prompt system, memory, modes, and personas that make it AadidevGPT.</p></div>
+        <div class="card"><span class="ico">🎨</span><h3>The design</h3><p>A sand-and-olive identity with serif typography, fully responsive from phones to desktops, with dark and light modes and custom accent colors.</p></div>
+        <div class="card"><span class="ico">🛠️</span><h3>Development</h3><p>Every feature shipped with tests — 35 passing tests cover auth, chat limits, the welcome flow, and the database layer.</p></div>
+        <div class="card"><span class="ico">📈</span><h3>The process</h3><p>It started as a basic chatbot and grew into streaming replies, accounts, memory, project mode, and Postgres persistence — one problem at a time.</p></div>
+    </div>
+
+    <h3 style="font-family:'Fraunces',serif;font-size:22px;font-weight:600;margin:44px 0 6px;">Problems I actually solved</h3>
+    <p class="lead" style="margin-bottom:18px;">Real bugs from real deploys — and how they got fixed.</p>
+
+    <div class="grid">
+        <div class="card"><span class="ico">🗄️</span><h3>Chats kept vanishing</h3><p>Render's free tier wipes its filesystem on every redeploy, so SQLite accounts disappeared. I migrated the database to PostgreSQL — accounts and chats now survive redeploys and restarts.</p></div>
+        <div class="card"><span class="ico">🔑</span><h3>Logins wouldn't stick</h3><p>Sessions died on every server restart because the signing key wasn't persisted. The key now lives on disk, so sign-ins survive restarts.</p></div>
+        <div class="card"><span class="ico">👥</span><h3>Duplicate accounts</h3><p>Signing up twice with the same email created junk accounts. A unique constraint now rejects duplicates with a clear message.</p></div>
+        <div class="card"><span class="ico">🎟️</span><h3>One free chat, then sign-in</h3><p>Guests get exactly one free chat per browser; signed-in users get unlimited. The whole limit lives in one backend check.</p></div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="reveal">
+    <div class="section-tag">Features</div>
+    <h2>What you can do</h2>
+    <p class="lead">Everything is built in — no setup needed.</p>
+
+    <div class="grid">
+        <div class="card"><span class="ico">⚡</span><h3>Streaming chat</h3><p>Replies appear word-by-word with markdown, code highlighting, and copy buttons.</p></div>
+        <div class="card"><span class="ico">🧠</span><h3>Memory</h3><p>Tap "Remember this" and AadidevGPT-0 keeps facts about you across every chat.</p></div>
+        <div class="card"><span class="ico">📁</span><h3>Project mode</h3><p>Tell it what you're building once — it keeps your project in mind everywhere.</p></div>
+        <div class="card"><span class="ico">🎭</span><h3>AI modes</h3><p>Switch personas: Coding, Study, School, Writing, Research, Business, or Build.</p></div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+        <h3>Everything else, built in</h3>
+        <p style="margin-bottom:12px;">The rest of the product is included, not bolted on:</p>
+        <div class="chips">
+            <span class="chip">🗣️ Voice input</span>
+            <span class="chip">🧰 Tools — calculator, translate, rewrite, brainstorm, math, code</span>
+            <span class="chip">📤 Share &amp; export</span>
+            <span class="chip">✨ Personalities</span>
+            <span class="chip">🕶️ Temporary chat</span>
+            <span class="chip">🎨 Dark/light mode &amp; accent colors</span>
+            <span class="chip">🏫 School mode — natural-sounding writing</span>
+        </div>
+    </div>
+</section>
+
+<!-- PRIVACY -->
+<section class="reveal">
+    <div class="section-tag">Privacy</div>
+    <h2>Your data, straight up</h2>
+    <p class="lead">You're storing chats, memory, and projects with us — here's exactly what that means.</p>
+
+    <div class="grid">
+        <div class="card"><span class="ico">🔒</span><h3>Tied to your account</h3><p>Chats, memory, and project context belong to your account. They're only visible while you're signed in — signing out hides everything.</p></div>
+        <div class="card"><span class="ico">🗑️</span><h3>Full deletion</h3><p>Delete your account and everything goes: chats, memory, projects, and your profile — permanently, no backups kept.</p></div>
+        <div class="card"><span class="ico">✉️</span><h3>Email is just for login</h3><p>Your email is used solely for signing in and password resets. It's never sold, shared, or used for marketing.</p></div>
+        <div class="card"><span class="ico">🧊</span><h3>Guest chats aren't stored</h3><p>If you're not signed in, your single free chat lives only in that browser session — it's never written to the database.</p></div>
+    </div>
+</section>
+
+<!-- HOW TO USE + FAQ: two blocks side by side -->
+<div class="bottom-pair">
+
+<section class="reveal">
+    <div class="section-tag">Get started</div>
+    <h2>How to use it</h2>
+    <p class="lead">Three simple steps.</p>
+
+    <div class="steps">
+        <div class="step"><div class="num">1</div><div><h3>Ask anything</h3><p>Type a question or use the suggestion chips to start. Your first chat is free.</p></div></div>
+        <div class="step"><div class="num">2</div><div><h3>Create an account</h3><p>Sign in with email or Google to save your chats and chat <span class="hl">without limits</span>.</p></div></div>
+        <div class="step"><div class="num">3</div><div><h3>Make it yours</h3><p>Set a personality, pick an AI mode, add memory, or start a project — it all carries over.</p></div></div>
+    </div>
+</section>
+
+<section class="reveal">
+    <div class="section-tag">FAQ</div>
+    <h2>Questions &amp; answers</h2>
+    <p class="lead">A few things people usually ask.</p>
+
+    <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Is AadidevGPT-0 free?<span class="arrow">▼</span></button>
+        <div class="faq-a">Visitors get one free chat, and signed-in users get unlimited chats.</div>
+    </div>
+    <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Where are my chats saved?<span class="arrow">▼</span></button>
+        <div class="faq-a">Chats, memory, and project context are stored on your account and only visible when you're signed in. Deleting your account erases them permanently.</div>
+    </div>
+    <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">What is model 04Aadi?<span class="arrow">▼</span></button>
+        <div class="faq-a">04Aadi is AadidevGPT-0's application layer — the prompt system, memory, modes, and personas built by Aadidev Prasanth. The language model underneath is a hosted open-source model (gpt-oss-20b) called through the Groq API.</div>
+    </div>
+    <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Can I use it on my phone?<span class="arrow">▼</span></button>
+        <div class="faq-a">Yes — it's fully responsive and works on every device.</div>
+    </div>
+    <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">How do I get support?<span class="arrow">▼</span></button>
+        <div class="faq-a">Email <span class="hl">aadevprasanth12@yahoo.com</span> and we'll help.</div>
+    </div>
+</section>
+
+</div>
+
+<footer>
+    <div class="foot-brand"><span class="dot"></span> AadidevGPT-0</div>
+    <p>Powered by model 04Aadi · built with care · © 2026 Aadidev Prasanth</p>
+</footer>
+
+<script>
+function toggleFaq(btn) {
+    btn.parentElement.classList.toggle("open");
+}
+
+// Reveal sections as they scroll into view.
+(function () {
+    var els = document.querySelectorAll(".reveal");
+    if (!("IntersectionObserver" in window)) {
+        els.forEach(function (el) { el.classList.add("show"); });
+        return;
+    }
+    var obs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+            if (e.isIntersecting) { e.target.classList.add("show"); obs.unobserve(e.target); }
+        });
+    }, { threshold: 0.08 });
+    els.forEach(function (el) { obs.observe(el); });
+})();
+</script>
+
+</body>
+</html>
