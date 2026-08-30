@@ -19,15 +19,10 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Trust X-Forwarded-* headers so request.url_root is https on Render
-# (required for Google's redirect URI and email links to match exactly).
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-# ---------------------------------------------------------------------------
-# Limits
-# ---------------------------------------------------------------------------
-FREE_GUEST_CHATS = 1     # how many chats a visitor gets before signing in
-DAILY_CHAT_LIMIT = 0     # signed-in chats per day; 0 = unlimited for logged-in users
+FREE_GUEST_CHATS = 1     
+DAILY_CHAT_LIMIT = 0     
 
 
 # ---------------------------------------------------------------------------
@@ -50,27 +45,17 @@ def _get_secret_key():
             f.write(key)
         return key
     except OSError:
-        # Read-only filesystem (some cloud hosts): use an ephemeral key.
-        # Sessions will reset on restart, which is acceptable.
+        
         return secrets.token_hex(32)
 
 
 app.secret_key = _get_secret_key()
 
-# Persistent "remember me" login: sessions survive the browser closing
-# for 30 days (session.permanent is set on signup/login when requested).
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
 
-# ---------------------------------------------------------------------------
-# Database
-# ---------------------------------------------------------------------------
-# Local dev uses a SQLite file. In production set DATABASE_URL (Postgres) so
-# accounts and chats survive deploys — Render's free filesystem is ephemeral,
-# so a local users.db would be wiped on every deploy.
-# DATABASE_PATH can be overridden (used by the test suite).
 DB_PATH = os.environ.get("DATABASE_PATH") or os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "users.db"
 )
@@ -88,7 +73,7 @@ def _sqlite_to_pg(sql):
         if quote:
             out.append(ch)
             if ch == quote:
-                if i + 1 < n and sql[i + 1] == quote:  # escaped '' or ""
+                if i + 1 < n and sql[i + 1] == quote:  # 
                     out.append(sql[i + 1])
                     i += 1
                 else:
@@ -330,10 +315,6 @@ def _rate_key():
     return "ip:" + (request.remote_addr or "?")
 
 
-# ---------------------------------------------------------------------------
-# Groq client
-# ---------------------------------------------------------------------------
-# Do not crash at startup when the key is missing; /chat reports the problem.
 groq_api_key = os.getenv("GROQ_API_KEY")
 
 client = Groq(api_key=groq_api_key) if groq_api_key else None
@@ -364,6 +345,9 @@ FORMATTING RULES:
 4. If the user asks for contact or support, tell them to email aadidevprasanth12@yahoo.com.
 5. If the user asks for something but hasn't given enough information, ask for the missing details before giving a finalized answer.
 6. If the user seems stuck or is having difficulty, ask what's wrong and offer to help.
+7. If user asks for specific output type such as PDF,Doc, or code, you should ouput it formatted to what the user needs. This can be asked by you if user specifically hasent gaven enough information about what they want or if youser specifically asks the ai to give awnser in their wanted format.
+8. If user wants to export as something to the ai cannot do tell user "Sorry, we do not export that type of file" and instead give them a copy and pastable finish just in the chat itself.
+9. if user exploits user terms of service the ai should explicity say "Sorry, thats against our policy. If you think that AadidevGPT is rong please contact constomur servecis
 
 CONVERSATION MEMORY:
 - Pay attention to previous messages in the current conversation.
