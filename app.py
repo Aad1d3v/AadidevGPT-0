@@ -25,9 +25,6 @@ FREE_GUEST_CHATS = 1
 DAILY_CHAT_LIMIT = 0     
 
 
-# ---------------------------------------------------------------------------
-# Secret key for signed session cookies
-# ---------------------------------------------------------------------------
 def _get_secret_key():
     key = os.getenv("SECRET_KEY")
     if key:
@@ -165,8 +162,7 @@ def init_db():
         )
         """ % (_ID_COL, _NOW_EXPR)
     )
-    # Defensive: enforce email uniqueness even if the table predates the
-    # UNIQUE column constraint (e.g. an older database file).
+    
     try:
         conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)")
     except Exception:
@@ -282,18 +278,12 @@ def sanitize_conversation(conversation):
         if not isinstance(content, str) or not content.strip():
             continue
         out.append({"role": role, "content": content})
-
-    # The frontend sends current history including the latest user message;
-    # drop that trailing duplicate (it is supplied as "message" already).
+        
     if out and out[-1]["role"] == "user":
         out = out[:-1]
 
-    return out[-40:]  # keep the model prompt bounded
+    return out[-40:]  
 
-
-# ---------------------------------------------------------------------------
-# Simple in-memory rate limiting (per IP / per user)
-# ---------------------------------------------------------------------------
 _attempts = defaultdict(deque)
 
 
@@ -357,7 +347,6 @@ CONVERSATION MEMORY:
 """
 
 
-# AI modes / personas ("General" adds nothing; the others steer the style).
 AI_MODES = {
     "general": "",
     "coding": "You are in Coding mode. Focus on writing clean, correct, and well-commented code. Explain your approach briefly before or after the code, show concrete examples, and point out edge cases.",
@@ -411,9 +400,6 @@ def _serialize_conversation(r):
     }
 
 
-# ---------------------------------------------------------------------------
-# Shared chat-context resolver
-# ---------------------------------------------------------------------------
 def _resolve_context(user, data):
     """Applies the requested chat action for a logged-in user.
 
@@ -421,7 +407,8 @@ def _resolve_context(user, data):
     success, or (False, (status, json_response)) on failure (conn closed).
     On success the caller owns `conn` and must close it.
     """
-    # Roll the daily counter over if the day changed.
+
+    
     conn = get_db()
     if user["chat_date"] != today_str():
         conn.execute(
@@ -450,7 +437,6 @@ def _resolve_context(user, data):
     edit_message_id = data.get("edit_message_id")
     regenerate = bool(data.get("regenerate"))
 
-    # Resolve which conversation we are writing to.
     if not conversation_id:
         conversation_id = conn.execute(
             "INSERT INTO conversations (user_id, title) VALUES (?, ?) RETURNING id",
@@ -465,7 +451,7 @@ def _resolve_context(user, data):
             conn.close()
             return False, (404, {"error": "conversation_not_found", "message": "That conversation could not be found."})
 
-    # Edit: replace a previous user message and drop everything after it.
+ 
     if edit_message_id:
         msg = conn.execute(
             "SELECT role FROM messages WHERE id = ? AND conversation_id = ?",
@@ -485,7 +471,7 @@ def _resolve_context(user, data):
         )
         conn.execute("DELETE FROM messages WHERE id > ?", (edit_message_id,))
 
-    # Regenerate: drop the previous assistant reply, reuse the last user prompt.
+
     elif regenerate:
         last = conn.execute(
             "SELECT id, role, content FROM messages WHERE conversation_id = ? "
@@ -497,7 +483,7 @@ def _resolve_context(user, data):
             return False, (400, {"error": "nothing_to_regenerate", "message": "There's nothing to regenerate."})
         conn.execute("DELETE FROM messages WHERE id >= ?", (last["id"],))
 
-    # New message.
+
     else:
         if not user_message:
             conn.close()
@@ -509,8 +495,6 @@ def _resolve_context(user, data):
             (conversation_id, "user", user_message),
         )
 
-    # History after the change. The last message is always the active user
-    # prompt; it is supplied to the model as the current turn.
     rows = conn.execute(
         "SELECT id, role, content FROM messages WHERE conversation_id = ? ORDER BY id ASC",
         (conversation_id,),
@@ -548,18 +532,12 @@ def _consume_chat(conn, user_id):
     )
 
 
-# ---------------------------------------------------------------------------
-# Pages + auth
-# ---------------------------------------------------------------------------
-# First-visit cookie: new visitors see the welcome page once, then go
-# straight to the app.
 WELCOME_COOKIE = "aadev_welcomed"
 
 
 @app.route("/")
 def home():
-    # New visitors see the welcome page once. Redirects that carry query
-    # params (Google OAuth, email verification) always land on the app.
+    
     if not request.cookies.get(WELCOME_COOKIE) and not request.args:
         return redirect(url_for("welcome"))
     return render_template("index.html")
@@ -573,7 +551,7 @@ def welcome():
 @app.route("/welcome/enter")
 def welcome_enter():
     resp = redirect(url_for("home"))
-    # Persist for a year; a returning visitor skips the welcome page.
+    
     resp.set_cookie(WELCOME_COOKIE, "1", max_age=60 * 60 * 24 * 365, samesite="Lax")
     return resp
 
@@ -636,8 +614,7 @@ def signup():
         (email, generate_password_hash(password), 0 if email_configured() else 1),
     )
 
-    # Send a verification email when SMTP is configured (non-blocking:
-    # the user can still chat before verifying).
+
     verified = 1
     if email_configured():
         verified = 0
@@ -716,9 +693,6 @@ def logout():
     return jsonify({"ok": True})
 
 
-# ---------------------------------------------------------------------------
-# Account management
-# ---------------------------------------------------------------------------
 @app.route("/settings", methods=["GET", "POST"])
 def settings():
     user = get_current_user()
@@ -741,7 +715,7 @@ def settings():
 
         return jsonify({"ok": True, "custom_instructions": instructions, "project_name": project_name, "project_desc": project_desc})
 
-    # GET: account + developer info.
+ 
     conn = get_db()
     base = conn.execute(
         "SELECT id, email, verified, created_at, chats_used, chat_date FROM users WHERE id = ?",
@@ -861,9 +835,6 @@ def delete_account():
     return jsonify({"ok": True})
 
 
-# ---------------------------------------------------------------------------
-# Google OAuth sign-in
-# ---------------------------------------------------------------------------
 GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
 GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo"
@@ -952,9 +923,8 @@ def google_callback():
     conn = get_db()
     user = conn.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchone()
     if not user:
-        # Google already verified this address, so the account is verified.
-        # The password is a random unguessable value (use "forgot password"
-        # to set a real one later).
+
+        
         user = {"id": conn.execute(
             "INSERT INTO users (email, password_hash, verified) VALUES (?, ?, 1) RETURNING id",
             (email, generate_password_hash(secrets.token_urlsafe(24))),
@@ -965,11 +935,8 @@ def google_callback():
     session["user_id"] = user["id"]
     session.permanent = True
     return redirect(url_for("home"))
+    
 
-
-# ---------------------------------------------------------------------------
-# Email (SMTP) — used for password reset + email verification
-# ---------------------------------------------------------------------------
 def email_configured():
     return bool(os.getenv("SMTP_HOST") and os.getenv("SMTP_USER") and os.getenv("SMTP_PASSWORD"))
 
@@ -1050,7 +1017,7 @@ def forgot_password():
         )
     conn.close()
 
-    # Always succeed so people can't probe which addresses are registered.
+   
     return jsonify({"ok": True})
 
 
@@ -1137,9 +1104,6 @@ def resend_verification():
     return jsonify({"ok": True})
 
 
-# ---------------------------------------------------------------------------
-# Chat history
-# ---------------------------------------------------------------------------
 @app.route("/conversations", methods=["GET"])
 def list_conversations():
     user = get_current_user()
@@ -1374,7 +1338,7 @@ def _export_pdf(conv, rows, safe_name):
         text_lines.extend((r["content"] or "").split("\n"))
         text_lines.append("")
 
-    # Wrap lines to ~95 chars so text stays inside the page.
+  
     wrapped = []
     for line in text_lines:
         while len(line) > 95:
@@ -1395,7 +1359,7 @@ def _export_pdf(conv, rows, safe_name):
         rest = wrapped[len(chunk):]
         if not rest:
             break
-        # Leave room for a page number on the next page.
+        # im leavig Leave room for a page number on the next page.
         chunk = rest[:max_lines - 1]
 
     objects = []
@@ -1408,7 +1372,7 @@ def _export_pdf(conv, rows, safe_name):
         obj_id += 1
 
     add("<< /Type /Catalog /Pages 2 0 R >>")  # 1
-    add("<< /Type /Pages /Kids [3 0 R] /Count 1 >>")  # 2 (placeholder)
+    add("<< /Type /Pages /Kids [3 0 R] /Count 1 >>")  # 2
 
     page_objs = []
     for pi, page_lines in enumerate(pages):
@@ -1424,7 +1388,6 @@ def _export_pdf(conv, rows, safe_name):
         add("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents %d 0 R >>" % content_id)
         page_objs.append(page_obj_id)
 
-    # Fix the Pages object to reference the real page objects.
     objects[1] = (2, "<< /Type /Pages /Kids [%s] /Count %d >>" % (
         " ".join("%d 0 R" % p for p in page_objs), len(page_objs)))
     add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>")  # 4
@@ -1451,9 +1414,6 @@ def _export_pdf(conv, rows, safe_name):
     )
 
 
-# ---------------------------------------------------------------------------
-# Memory ("Remember this" / "Forget memory")
-# ---------------------------------------------------------------------------
 @app.route("/memory", methods=["GET"])
 def get_memory():
     user = get_current_user()
@@ -1511,10 +1471,6 @@ def forget_memory():
     conn.close()
     return jsonify({"ok": True})
 
-
-# ---------------------------------------------------------------------------
-# Share a conversation (read-only public link)
-# ---------------------------------------------------------------------------
 def _share_token_for(conn, cid):
     row = conn.execute(
         "SELECT token FROM shares WHERE conversation_id = ?", (cid,)
@@ -1602,9 +1558,7 @@ def view_share(token):
     )
 
 
-# ---------------------------------------------------------------------------
-# Chat (classic non-streaming endpoint, kept for compatibility)
-# ---------------------------------------------------------------------------
+
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.get_json(silent=True)
@@ -1619,7 +1573,7 @@ def chat():
 
     if client is None:
         return jsonify({
-            "error": "⚠️ AadidevGPT-0 is not configured yet: the server is missing its GROQ_API_KEY."
+            "error": " AadidevGPT-0 is not configured yet: the server is missing its GROQ_API_KEY."
         }), 503
 
     if _rate_limited(_rate_key() + ":chat", 60, 60):
@@ -1692,9 +1646,6 @@ def chat():
     })
 
 
-# ---------------------------------------------------------------------------
-# Chat (streaming, SSE) — used by the web UI
-# ---------------------------------------------------------------------------
 def _sse(obj):
     return "data: " + json.dumps(obj) + "\n\n"
 
@@ -1717,8 +1668,6 @@ def chat_stream():
     temporary = bool(data.get("temporary"))
     mode = data.get("mode") or "general"
 
-    # Temporary chat: in-memory only, nothing persisted to the DB — works for
-    # both guests and signed-in users. Signed-in users still consume a daily chat.
     if temporary:
         if logged_in:
             if DAILY_CHAT_LIMIT > 0 and (daily_remaining(user) or 0) <= 0:
@@ -1726,7 +1675,7 @@ def chat_stream():
                     "error": "limit_reached",
                     "message": "You've used all " + str(DAILY_CHAT_LIMIT) + " of your chats for today. Come back tomorrow!",
                 }), 403
-            # Consume the daily chat up-front (outside the generator).
+         
             conn = get_db()
             _consume_chat(conn, user["id"])
             conn.commit()
@@ -1737,7 +1686,7 @@ def chat_stream():
             return _stream_in_memory(data, instructions, memory, mode, remaining,
                                      user["project_name"], user["project_desc"])
 
-        # Guest temporary chat == normal guest chat.
+
         return _stream_guest(data)
 
     if logged_in:
@@ -1745,7 +1694,7 @@ def chat_stream():
         if not ok:
             return jsonify(payload[1]), payload[0]
         conn, conversation_id, prompt, model_history, title, used = payload
-        conn.commit()  # persist user-side changes even if the stream fails
+        conn.commit()  
 
         model_messages = build_model_messages(
             prompt, model_history, user["custom_instructions"], user["memory"],
@@ -1766,7 +1715,7 @@ def chat_stream():
                         stream_options={"include_usage": True},
                     )
                 except Exception:
-                    # Some providers reject stream_options; retry without it.
+                
                     stream = client.chat.completions.create(
                         model=MODEL, messages=model_messages, stream=True
                     )
@@ -1823,7 +1772,7 @@ def chat_stream():
                         except Exception:
                             pass
                     else:
-                        conn.rollback()  # don't keep an empty assistant message
+                        conn.rollback() 
                 try:
                     conn.close()
                 except Exception:
@@ -1855,9 +1804,7 @@ def _stream_guest(data):
     history = sanitize_conversation(data.get("conversation") or data.get("history"))
     model_messages = build_model_messages(user_message, history, "")
 
-    # Consume the guest chat up-front: Flask signs the session cookie
-    # before the stream body is consumed, so writes inside the generator
-    # would never persist.
+
     session["guest_chats"] = session.get("guest_chats", 0) + 1
 
     def generate():
